@@ -1,0 +1,375 @@
+Definição de uma classe em Java.
+class Aluno {
+	//Atributo
+	private String Nome; 		
+	//Métodos
+	public void inserirNome ( ) {
+		Nome = System.in.toString ();
+	}
+	public String recuperarNome ( ) {
+		return Nome;
+	}
+}
+
+Os modificadores podem ser qualquer elemento do seguinte conjunto:
+{ Annotation, public, protected, private, abstract, static, final, strictfp}
+
+Annotation - Não é propriamente um elemento, mas sim uma definição. Sua semântica implementa o conceito de anotações em Java e pode ser substituída por uma anotação padrão ou criada pelo programador.
+Public, Protected e Private - São os símbolos que veremos quando falarmos de encapsulamento; são modificadores de acesso.
+Static - Este modificador afeta o ciclo de vida da instância da classe e só pode ser usado em classes membro.
+abstract e final - Já os modificadores abstract e final relacionam-se com a hierarquia de classes. Todos esses modificadores serão vistos oportunamente.
+strictfp - Por fim, esse é um modificador que torna a implementação de cálculos de ponto flutuando independentes da plataforma. Sem o uso desse modificador, as operações se tornam dependentes da plataforma sobre a qual a máquina virtual é executada.
+
+Definição de classe com a presença de modificadores:
+@Deprecated @SuppressWarnings ("deprecation") public abstract strictfp class Aluno extends Pai implements Idealizacao, Sonho {
+    //Atributo
+    private String Nome; 
+        
+    //Métodos (parcialmente mostrados)
+    public void inserirNome ( ) {
+        Nome = System.in.toString ();
+    }
+    public String recuperarNome ( ) {
+        return Nome
+    ...//outros métodos ocultados por simplicidade
+    }
+}
+
+A criação de um objeto se dá em duas etapas:
+
+Primeiramente, uma variável é declarada como sendo do tipo de alguma classe.
+
+A seguir, o compilador é instruído a gerar um objeto a partir daquela classe, que será rotulado com o identificador que nomeia a variável.
+EX: Aluno objetoAluno = new Aluno ( )
+ou 
+Aluno objetoAluno; //declaração
+objetoAluno = new Aluno ( ); //instanciação 
+
+[Aluno objetoAluno] - Declaração de Variável 
+[=] -  Inicialização de Variável
+[new] Instrução de instanciação de objeto
+[Aluno ( )] - Chamado ao construtor da classe;
+
+O processo de criação do objeto começa com a alocação do espaço em memória.
+E prossegue com a execução do código de construção do objeto.
+Esse código, obrigatoriamente, deve ser implementado num método especial chamado construtor.
+O método construtor é sempre executado quando da instanciação de um objeto e obrigatoriamente deve ter nome idêntico ao da classe.
+ 
+Instanciação de objeto com "new".
+//Importações
+import java.util.Random;
+	
+	//Classe
+	public class Aluno {
+	//Atributos    
+	private String nome;
+	private int idade;
+	private double codigo_identificador;
+	private Random aleatorio;
+	
+	//Métodos
+	public void Aluno ( String nome , int idade ) {
+		aleatorio = new Random ();
+		this.nome = nome;
+		this.idade = idade;
+		this.codigo_identificador = aleatorio.nextDouble ();
+	}
+	public void definirNome ( String nome ) {
+		this.nome = nome;
+	}  
+	public void definirIdade ( int idade ) {
+		this.idade = idade;
+	}
+}
+
+Método “finalize ( ) - Este, quando implementado por uma classe, é invocado no momento em que a JVM for reciclar o objeto. Todavia, o método “finalize ( )” é solicitado quando o objeto estiver para ser reciclado, e não quando ele sair do escopo.
+
+Associação - A Associação é semanticamente a mais fraca e se refere a objetos que consomem – usam – serviços ou funcionalidades de outros. Ela pode ocorrer mesmo quando nenhuma classe possui a outra e cada objeto instanciado tem sua existência independente do outro. Essa relação pode ocorrer com cardinalidade 1-1, 1-n, n-1 e n-n.
+Agregação - Outro tipo de relacionamento entre classes é a Agregação, que ocorre entre dois ou mais objetos, com cada um tendo seu próprio ciclo de vida, mas com um objeto (pai) contendo os demais (filhos). É importante compreender que, nesse caso, os objetos filhos podem sobreviver à destruição do objeto pai. Um exemplo de Agregação se dá entre escola e aluno: se uma escola deixar de existir, não implica que o mesmo irá ocorrer com os seus alunos.
+Composição - A Composição difere sutilmente da Agregação, pois ocorre quando há uma relação de dependência entre o(s) filho(s) e o objeto pai. Ou seja, caso o pai deixe de existir, necessariamente o filho será destruído. Voltando ao exemplo anterior, temos uma composição entre a escola e os departamentos. A extinção da escola traz consigo a extinção dos departamentos.
+
+class Escola {
+	//Atributos
+	private String nome, CNPJ;   
+	private Endereco endereco;
+	private Departamento departamentos [];
+	private Aluno discentes [];
+	private int nr_discentes , nr_departamentos;}
+	
+	//Métodos
+		public Escola ( String nome , String CNPJ) {
+			this.nome = nome;
+			this.CNPJ = CNPJ;
+			this.departamentos = new Departamento [10];
+			this.discentes = new Aluno [1000];
+			this.nr_departamentos = 0;
+			this.nr_discentes = 0;
+		}
+		public void criarDepartamento ( String nomeDepartamento ) {
+			if ( nr_departamentos <= 10 )
+			{
+				departamentos [ nr_departamentos ] = new Departamento ( nomeDepartamento );
+				nr_departamentos++;    //No caso de “Departamento”, objetos dessa classe são instanciados.
+			} else {
+				System.out.println ( "Nao e possivel criar outro Departamento." );
+		}
+		public void matricularAluno ( Aluno novoAluno ) {
+			discentes [ nr_discentes ] = novoAluno;
+		}
+}
+
+Referenciando objetos.
+
+public class Referencia {
+	private Aluno a1 , a2;
+	
+	public Referencia ( ) {
+		a1 = new Aluno ( "Carlos" , 20);   
+		System.out.println("O nome do aluno a1 é " + a1.recuperarNome());
+		System.out.println("O nome do aluno a2 é " + a2.recuperarNome());
+		a2 = a1;
+		a2.definirNome("Flávia");
+		System.out.println("O nome do aluno a1 é " + a1.recuperarNome());
+		manipulaAluno ( a1 );
+		System.out.println("O nome do aluno a1 é " + a1.recuperarNome());
+	}
+	public void manipulaAluno ( Aluno aluno ) {
+		aluno.definirNome("Márcia");
+	}
+}
+Saída:
+    O nome do aluno a1 é Carlos
+    O nome do aluno a2 é Ana
+    O nome do aluno a1 é Flávia
+    O nome do aluno a1 é Márcia
+
+    
+Herança em classes:
+    public class ProfessorComissionado extends Professor {	
+        } //, podemos observar que a herança é declarada apenas para a classe ancestral imediata.
+
+Herança em interfaces.
+    public interface ProfessorComissionado extends Professor, Diretor {
+    }
+
+Níveis de acesso em Java: 
+Default: Assumido quando nenhum modificador é usado. Define a visibilidade como restrita ao pacote.
+Privado: Declarado pelo uso do modificador “private”. A visibilidade é restrita à classe.
+Protegido: Declarado pelo uso do modificador “protected”. A visibilidade é restrita ao pacote e a todas as subclasses.
+Público: Declarado pelo uso do modificador “public”. Não há restrição de visibilidade.
+
+
+Tabela Níveis de acesso e escopo.
+
+                                                            default             public            private                protected
+  Subclasse do mesmo pacote                                    sim                sim               não                     sim
+  Subclasse de pacote diferente                                não                sim               não                     sim
+  Classe (não derivada) do mesmo pacote                        sim                sim               não                     sim
+  Classe (não derivada) de pacote diferente                    não                sim               não                     não
+                                          
+As restrições impostas pelos modificadores de acessibilidade são afetadas pela herança da seguinte maneira:
+
+  Métodos (e atributos) declarados públicos na superclasse devem ser públicos nas subclasses.
+  Métodos (e atributos) declarados protegidos na superclasse devem ser protegidos ou públicos nas subclasses. Eles não podem ser privados.
+  Métodos e atributos privados não são accessíveis às subclasses, e sua acessibilidade não é afetada pela herança.
+
+  Os códigos que implementam as classes “Pessoa”, “Empregado”, “Aluno” e a classe principal do programa são mostrados respectivamente nos Código 8, Código 9, Código 10 e Código 11.
+
+Código 8: Classe "Pessoa".
+ 
+public class Pessoa {
+	//Atributos
+	private String nome;
+	private int idade;
+	private Calendar data_nascimento;
+	private long CPF;
+	private Endereco endereco;
+	
+	//Métodos
+	public Pessoa ( String nome , Calendar data_nascimento, long CPF , Endereco endereco ) {
+		this.nome = nome;
+		this.data_nascimento = data_nascimento;
+		this.CPF = CPF;
+		this.endereco = endereco;
+		atualizarIdade ();
+	}
+	protected void atualizarNome ( String nome ) {
+		this.nome = nome;
+	}
+	protected String recuperarNome ( ) {
+		return this.nome;
+	}
+	protected void atualizarIdade ( ) {
+		this.idade = calcularIdade ();
+	}
+	protected int recuperarIdade ( ) {
+		return this.idade;
+	}
+	protected void atualizarCPF ( long CPF ) {
+		this.CPF = CPF;
+	}
+	protected long recuperarCPF ( ) {
+		return this.CPF;
+	}
+	protected void atualizarEndereco ( Endereco endereco ) {
+		this.endereco = endereco;
+	}
+	protected Endereco recuperarEndereco ( ) {
+		return this.endereco;
+	}
+	private int calcularIdade ( ){
+		int lapso;
+		Calendar hoje = Calendar.getInstance();
+		lapso = hoje.get(YEAR) - data_nascimento.get(YEAR);
+		if ( ( data_nascimento.get(MONTH) > hoje.get(MONTH) ) || ( data_nascimento.get(MONTH) == hoje.get(MONTH) && data_nascimento.get(DATE) > hoje.get(DATE) ) )
+			lapso--;
+		return lapso;
+	}
+}
+
+Código 9: Classe "Empregado".
+
+public class Empregado extends Pessoa {
+	//Atributos
+	protected String matricula;
+	private Calendar data_admissao , data_demissao;
+				
+	public Empregado(String nome, Calendar data_nascimento, long CPF, Endereco endereco) {
+		super(nome, data_nascimento, CPF, endereco);
+		this.matricula = gerarMatricula ();
+		data_admissao = Calendar.getInstance();
+	}
+	public void demitirEmpregado () {
+		data_demissao = Calendar.getInstance();
+	}
+	protected void gerarMatricula () {
+		this.matricula = "Matrícula não definida.";
+	}
+	protected String recuperarMatricula () {
+		return this.matricula;
+	}
+}
+
+
+Código 10: Classe "Aluno".
+  
+public class Aluno extends Pessoa {
+	//Atributos    
+	private String matricula;
+		
+	//Métodos
+	public Aluno ( String nome , Calendar data_nascimento , long CPF , Endereco endereco ) {
+		super ( nome , data_nascimento , CPF , endereco );
+	}
+}
+
+
+Código 11: Classe Principal (código parcial).
+
+public class Principal {
+	//Atributos
+	private static Aluno aluno;
+	private static Endereco endereco;
+	
+	//Método main
+	public static void main (String args[]) {
+		int idade;
+		Calendar data = Calendar.getInstance();
+		data.set(1980, 10, 23);
+		endereco = new Endereco ();
+		endereco.definirPais("Brasil");
+		endereco.definirUF("RJ");
+		endereco.definirCidade ("Rio de Janeiro");
+		endereco.definirRua("Avenida Rio Branco");
+		endereco.definirNumero("156A");
+		endereco.definirCEP(20040901);
+		endereco.definirComplemento("Bloco 03 - Ap 20.005");
+		aluno = new Aluno ("Marco Antônio", data , 901564098 , endereco);
+		aluno.atualizarIdade();
+		idade = aluno.recuperarIdade();
+
+	}
+}
+
+O código 12 mostra a classe “Diretor”, que é subclasse de “Empregado”, e o código 13 mostra a classe “Principal” modificada.
+
+Código 12: Classe "Diretor".
+
+public class Diretor extends Empregado {
+	//Atributos
+	
+	//Métodos
+	public Diretor(String nome, Calendar data_nascimento, long CPF, Endereco endereco) {
+		super(nome, data_nascimento, CPF, endereco);
+	}
+	protected void gerarMatricula () {
+		matricula = "E-" + UUID.randomUUID( ).toString( );
+	}
+}
+
+Código 13: Classe "Principal" alterada.
+  
+public class Principal {
+	//Atributos
+	private static Empregado empregado , diretor;
+		
+	//Método main
+	public static void main (String args[]) {
+	
+		Calendar data = Calendar.getInstance();
+		data.set(1980, 10, 23);
+		empregado = new Empregado ("Clara Silva", data , 211456937 , null);
+		empregado.gerarMatricula();
+		diretor = new Diretor ("Marco Antônio", data , 901564098 , null);
+		diretor.gerarMatricula();
+		System.out.println ("A matrícula do Diretor é: " + diretor.recuperarMatricula());
+		System.out.println ("A matrícula do Empregado é: " + empregado.recuperarMatricula());
+	}
+}
+A execução desse código produz como saída:
+
+A matrícula do Diretor é: E-096d9a3d-98e9-4af1-af61-a03d97525429
+
+A matrícula do Empregado é: Matrícula não definida.
+
+
+Código 14: Polimorfismo por sobrecarga de método.
+
+public class Diretor extends Empregado {
+	//Atributos
+	
+	//Métodos
+	public Diretor(String nome, Calendar data_nascimento, long CPF, Endereco endereco) {
+		super(nome, data_nascimento, CPF, endereco);
+	}
+	protected void gerarMatricula () {
+		matricula = "E-" + UUID.randomUUID( ).toString( );
+	}
+	protected void alterarMatricula () {
+		gerarMatricula ();
+	}
+	protected void alterarMatricula ( String matricula ) {
+		this.matricula = matricula;
+	}
+}
+//Nesse caso, uma chamada do tipo “alterarMatricula ()” invocará o método mostrado na linha 8 do Código 14. Caso seja feita uma chamada como “alterarMatricula (“M-202100-1000)”, o método chamado será o da linha 14, pois o parâmetro é uma “String”.
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
