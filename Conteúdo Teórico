@@ -355,21 +355,222 @@ public class Diretor extends Empregado {
 //Nesse caso, uma chamada do tipo “alterarMatricula ()” invocará o método mostrado na linha 8 do Código 14. Caso seja feita uma chamada como “alterarMatricula (“M-202100-1000)”, o método chamado será o da linha 14, pois o parâmetro é uma “String”.
   
 
+Código 15: Classe "Aluno" modificada.
+
+public class Aluno {
+	//Atributos    
+	private String matricula , nome , naturalidade;
+		
+	//Métodos
+	public Aluno ( String nome , String naturalidade ) {
+			this.nome = nome;
+			this.naturalidade = naturalidade;
+	}
+		@Override
+		public String toString () {
+			return String.format("%s(%s)", nome , naturalidade );
+		}
+	} 
 
 
+Código 16: Classe "Escola" – agrupamento de objetos pelo programador.
+
+class Escola {
+	//Atributos
+	private String nome, CNPJ;   
+	private Endereco endereco;
+	private List departamentos;
+	private List discentes; //criada uma lista de objetos do tipo Aluno
+	
+	//Métodos
+	public Escola ( String nome , String CNPJ) {
+		this.nome = nome;
+		this.CNPJ = CNPJ;
+		this.departamentos = new ArrayList<Departamento> ( );
+		this.discentes = new ArrayList<Aluno> ( );
+	}
+	public void criarDepartamento ( String nomeDepartamento ) {
+		departamentos.add ( new Departamento ( nomeDepartamento ) );
+	}
+	public void fecharDepartamento ( Departamento departamento ) {
+		departamentos.remove ( departamento );
+	}
+	public void matricularAluno ( Aluno novoAluno ) {
+		discentes.add ( novoAluno );
+	}
+	public void trancarMatriculaAluno ( Aluno aluno ) {
+		discentes.remove ( aluno );
+	}
+	public void agruparAlunos ( ) {    				  //O método de agrupamento
+		Map < String , List < Aluno > > agrupamento = new HashMap <> (); // declaração de uma estrutura do tipo “Map” e a instanciação da classe pelo objeto “agrupamentoPorNaturalidade”. Podemos observar que será mapeado um objeto do tipo “String” a uma lista de objetos do tipo “Aluno” (“Map < String , List < Aluno > >“).
+		for ( Aluno a : discentes ) {  				//o laço implementa a varredura sobre toda a lista. A cada iteração, o valor da variável “naturalidade” é recuperado, e a função “containsKey” verifica se a chave já existe no mapa. Se não existir, ela é inserida.
+			if(!agrupamento.containsKey ( a.recuperarNaturalidade ( ) )) {   //adiciona o objeto à lista correspondente à chave existente no mapa.
+				agrupamento.put( a.recuperarNaturalidade ( ) , new ArrayList<>( ) ); // método “put” é utilizado para inserir um elemento no mapeamento. A
+			}
+		agrupamento.get(a.recuperarNaturalidade ( ) ).add(a);  //método “get” é usado para recuperar a referência do objeto mapeado pela chave passada com parâmetro em “get”.
+		}
+	System.out.println ("Resultado do agrupamento por naturalidade: " + agrupamento );
+	}
+}
+
+Código 17: Classe Principal.
+
+public class Principal {
+	//Atributos
+	private static Aluno aluno1 , aluno2 , aluno3 , aluno4 , aluno5 , aluno6 , aluno7 , aluno8 , aluno9;
+	private static Escola escola;
+	
+	//Método main
+	public static void main (String args[]) {
+		escola = new Escola ( "Escola Pedro Álvares Cabral" , "42.336.174/0006-13");
+		criarAlunos ();
+	matricularAlunos ();
+	escola.agruparAlunos();
+}
+	
+	//Métodos
+	private static void criarAlunos ( ) {
+		aluno1 = new Aluno ( "Marco Antônio" , "Rio de Janeiro" );
+		aluno2 = new Aluno ( "Clara Silva" , "Rio de Janeiro" );
+		aluno3 = new Aluno ( "Marcos Cintra" , "Sorocaba" );
+		aluno4 = new Aluno ( "Ana Beatriz" , "Barra do Pirai" );
+		aluno5 = new Aluno ( "Marcio Gomes" , "São Paulo" );
+		aluno6 = new Aluno ( "João Carlos" , "Sorocaba" );
+		aluno7 = new Aluno ( "César Augusto" ,  "São Paulo" );
+		aluno8 = new Aluno ( "Alejandra Gomez" , "Madri" );
+		aluno9 = new Aluno ( "Castelo Branco" , "São Paulo" );
+	}
+	private static void matricularAlunos ( ) {
+		escola.matricularAluno(aluno1);
+		escola.matricularAluno(aluno2);
+		escola.matricularAluno(aluno3);
+		escola.matricularAluno(aluno4);
+		escola.matricularAluno(aluno5);
+		escola.matricularAluno(aluno6);
+		escola.matricularAluno(aluno7);
+		escola.matricularAluno(aluno8);
+		escola.matricularAluno(aluno9);
+	}
+}
 
 
+saída:
+
+Resultado do agrupamento por naturalidade: {
+
+São Paulo=[Marcio Gomes(São Paulo), César Augusto(São Paulo), Castelo Branco(São Paulo)],
+
+Rio de Janeiro=[Marco Antônio(Rio de Janeiro), Clara Silva(Rio de Janeiro)],
+
+Madri=[Alejandra Gomez(Madri)],
+
+Sorocaba=[Marcos Cintra(Sorocaba), João Carlos(Sorocaba)],
+
+Barra do Pirai=[Ana Beatriz(Barra do Pirai)]
+
+}
 
 
+Agrupamento pelo método “groupingBy”:
+Esse método possui três variantes sobrecarregadas, cujas assinaturas exibimos a :
+
+static <T, K> Collector<T,?,Map>> groupingBy(Function<? super T,? extends K> classifier)
+static <T, K, D, A, M extends Map<K, D>> Collector<T,?,M> groupingBy(Function<? super T,? extends K> classifier, Supplier<M> mapFactory, Collector<? super T,A,D> downstream)
+static <T, K, A, D> Collector<T,?,Map>  groupingBy(Function<? super T,? extends K> classifier, Collector<? super T,A,D> downstream)
+//A cláusula “static <T, K> Collector<T,?,Map<K,List<T>>>” é o método (“Collector”) que retorna uma estrutura “Map”, formada pelos pares “K” e uma lista de objetos “T”. “K” é a chave de agrupamento e “T”, obviamente, um objeto agrupado. Então a função cuja referência é passada para o método “groupingBy” é capaz de mapear o objeto na chave de agrupamento.
 
 
+Código 18: Agrupamento com o uso do método "groupingBy" (assinatura 1).
+
+class Escola {
+	//Atributos
+	private String nome, CNPJ;   
+	private Endereco endereco;
+	private List departamentos;
+	private List discentes;
+	
+	//Métodos
+	public Escola ( String nome , String CNPJ) {
+		this.nome = nome;
+		this.CNPJ = CNPJ;
+		this.departamentos = new ArrayList ( );
+		this.discentes = new ArrayList<> ( );
+	}
+	public void criarDepartamento ( String nomeDepartamento ) {
+		departamentos.add ( new Departamento ( nomeDepartamento ) );
+	}
+	public void fecharDepartamento ( Departamento departamento ) {
+		departamentos.remove ( departamento );
+	}
+	public void matricularAluno ( Aluno novoAluno ) {
+		discentes.add ( novoAluno );
+	}
+	public void trancarMatriculaAluno ( Aluno aluno ) {
+		discentes.remove ( aluno );
+	}
+	public void agruparAlunos ( ) {
+		Map < String , List < Aluno > > agrupamento = discentes.stream().collect(Collectors.groupingBy(Aluno::recuperarNaturalidade));
+		System.out.println ("Resultado do agrupamento por naturalidade: ");
+		agrupamento.forEach (( String chave , List < Aluno > lista) -> System.out.println (chave + " = " + lista ));
+	}
+}
+
+A execução desse código produz a saída a seguir:
+
+Resultado do agrupamento por naturalidade:
+
+São Paulo = [Marcio Gomes(São Paulo), César Augusto(São Paulo), Castelo Branco(São Paulo)]
+
+Rio de Janeiro = [Marco Antônio(Rio de Janeiro), Clara Silva(Rio de Janeiro)]
+
+Madri = [Alejandra Gomez(Madri)]
+
+Sorocaba = [Marcos Cintra(Sorocaba), João Carlos(Sorocaba)]
+
+Barra do Pirai = [Ana Beatriz(Barra do Pirai)]
 
 
+Código 19: Agrupamento com o uso do método "groupingBy" (assinatura 2).
+
+public void agruparAlunos ( int a ) {
+    Map < String , Set < Aluno > > agrupamento = discentes.stream().collect(Collectors.groupingBy(Aluno::recuperarNaturalidade , Collectors.toSet()));
+    System.out.println ("Resultado do agrupamento por naturalidade: ");    
+    agrupamento.forEach (( String chave , Set < Aluno > conjunto) -> System.out.println (chave + " = " + conjunto ));
+}
+//Podemos ver que o Código 19 utiliza uma estrutura do tipo “Set”, em vez de “List”, para criar as coleções. Consequentemente, o método “groupingBy” passou a contar com mais um argumento − “Collectors.toSet()” – que retorna um “Collector” que acumula os objetos em uma estrutura “Set”. A saída é a mesma mostrada para a execução do código 18.
 
 
+O Código 20 mostra uma sobrecarga do método “agruparAlunos”, que usa a terceira assinatura de “groupingBy”.
+Código 20: Agrupamento com o uso do método "groupingBy" (assinatura 3).
+
+public void agruparAlunos ( double a ) {
+	Map < String , Set < Aluno > > agrupamento = discentes.stream().collect(Collectors.groupingBy(Aluno::recuperarNaturalidade , TreeMap::new , Collectors.toSet()));
+	System.out.println ("Resultado do agrupamento por naturalidade: ");    
+	agrupamento.forEach (( String chave , Set < Aluno > conjunto) -> System.out.println (chave + " = " + conjunto ));
+}
+//A diferença sintática para a segunda assinatura é apenas a existência de um terceiro parâmetro no método “groupingBy”: “TreeMap::new”. Esse parâmetro vai instruir o uso do mecanismo “TreeMap” na instanciação de “Map” (“agrupamento”).
+
+Veja agora a saída desse código:
+
+Resultado do agrupamento por naturalidade:
+
+Barra do Pirai = [Ana Beatriz(Barra do Pirai)]
+
+Madri = [Alejandra Gomez(Madri)]
+
+Rio de Janeiro = [Clara Silva(Rio de Janeiro), Marco Antônio(Rio de Janeiro)]
+
+Sorocaba = [João Carlos(Sorocaba), Marcos Cintra(Sorocaba)]
+
+São Paulo = [Castelo Branco(São Paulo), César Augusto(São Paulo), Marcio Gomes(São Paulo)]
 
 
+Cada coleção encapsulada possui um mecanismo de funcionamento, apresentado brevemente a seguir:
 
+Set - Trata-se de uma abstração matemática de conjuntos. É usada para representar conjuntos e não admite elementos duplicados.
+List - Implementa o conceito de listas e admite duplicidade de elementos. É uma coleção ordenada e permite o acesso direto ao elemento armazenado, assim como a definição da posição onde armazená-lo. O conceito de Vetor fornece uma boa noção de como essa coleção funciona.
+Queue - Embora o nome remeta ao conceito de filas, trata-se de uma coleção que implementa algo mais genérico. Uma “Queue”” pode ser usada para criar uma fila (FIFO), mas também pode implementar uma lista de prioridades, na qual os elementos são ordenados e consumidos segundo a prioridade e não na ordem de chegada. Essa coleção admite a criação de outros tipos de filas com outras regras de ordenação.
+Deque - Implementa a estrutura de dados conhecida como Deque (Double Ended Queue). Pode ser usada como uma fila (FIFO) ou uma pilha (LIFO). Admite a inserção e a retirada em ambas as extremidades.
 
 
         
