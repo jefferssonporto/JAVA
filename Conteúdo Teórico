@@ -573,4 +573,147 @@ Queue - Embora o nome remeta ao conceito de filas, trata-se de uma coleção que
 Deque - Implementa a estrutura de dados conhecida como Deque (Double Ended Queue). Pode ser usada como uma fila (FIFO) ou uma pilha (LIFO). Admite a inserção e a retirada em ambas as extremidades.
 
 
-        
+
+Estrutura de desvio − if.
+public class Base {
+	private int temp = 1;
+	
+	public void desvio (){    
+		if ( temp )
+				System.out.println("Verdade");
+		else
+				System.out.println("Falsidade");
+	}
+}
+A sintaxe do comando “if” é a seguinte:
+if ( < expressão> )
+	bloco;
+[else
+	bloco;]
+
+
+"if" aninhado.
+
+class Base {
+		public static void main(String args[]) {
+			int mes = 4; 
+			String trimestre;
+			if ( mes == 1 || mes == 2 || mes == 3 )
+					trimestre = "Primeiro";
+			else if ( mes == 4 || mes == 5 || mes == 6 )
+					trimestre = "Segundo";
+			else if ( mes == 7 || mes == 8 || mes == 9 )
+				trimestre = "Terceiro";
+		else if ( mes == 10 || mes == 11 || mes == 12)
+				trimestre = "Quarto";
+		else
+				trimestre = "Erro!";
+		System.out.println("Abril está no " + trimestre + " trimestre.");
+	}
+}
+
+//Embora o aninhamento do comando “if” seja útil, muitos casos podem ser melhor resolvidos pelo comando “switch”. A sintaxe de “switch” é a seguinte:
+
+Código 24: switch
+ 
+switch ( < expressão> ) {
+	case < valor 1>:
+		bloco;
+		break;
+.
+.
+.
+	case :
+		bloco;
+	break;
+	default:
+		bloco;
+			break;
+}
+//No caso do comando “switch”, a expressão pode ser, por exemplo, uma “String”, “byte”, “int”, “char” ou “short”
+
+Estrutura de desvio − "switch".
+ 
+public class Base {
+	private String linguagem = “JAVA”;
+		
+	public void desvio (){    
+		switch ( linguagem ) {
+			case ( "C" ):
+					System.out.println("Suporta apenas programação estruturada");
+					break;
+			case ( "C++" ):
+					System.out.println("Suporta programação estruturada e orientada a objeto");
+					break;
+			case ( "JAVA "):
+					System.out.println("Suporta apenas programação orientada a objeto");
+					break;
+			default:
+					System.out.println("Erro!");
+					break;
+		}
+	}
+}
+
+//Outro grupo de comandos importante são as estruturas de repetição. As três estruturas providas pela Java são “while”, “do-while” e o laço “for”.
+A estrutura “while” tem a seguinte sintaxe:
+Código 26
+  
+while ( < expressão> ){
+	bloco;
+}
+
+Código 27 Estrutura de repetição − "while".
+
+class Base {
+    public static void main (String args []) {
+        private int controle = 0;
+        while ( controle < 10 ) {
+        System.out.println(controle);
+        controle++;
+        }
+    }
+}
+
+//A estrutura “do-while” tem funcionamento parecido. Todavia, ao contrário de “while”, nessa estrutura o bloco sempre será executado ao menos uma vez. Veja sua sintaxe:
+Código 28 do while
+
+do {
+	bloco;
+} while ( < expressão> );
+
+//Como vemos pela sintaxe, o primeiro “bloco” é executado e, somente após, a expressão é avaliada. Se for verdadeira, a repetição continua até que a expressão seja falsa. Caso contrário, a execução do programa continua na linha seguinte.
+Vejamos, no Código 29, o código 27 modificado para o uso de “do-while”.
+
+Código 29: Estruturas de repetição − "do-while".
+
+class Base {
+	public static void main (String args []) {
+		private int controle = 0;
+		do {
+			System.out.println(controle);
+			controle++;
+		}while ( controle < 10 );
+	}
+}
+
+A última estrutura de repetição que veremos é o laço “for”. A sua sintaxe é:
+
+Código 30:
+
+for ( inicialização ; expressão ; iteração ) {
+	bloco;
+}
+
+Código 31: Estruturas de repetição − "for".
+
+class Base {
+	public static void main (String args []) {
+		for ( int controle = 0 ; controle < 10 ; controle++ ) {
+			System.out.println(controle);
+			controle++;
+		}
+	}
+}
+
+//observamos que quando o “bloco” for formado por apenas uma instrução, o uso das chaves ( “{ }” ) é opcional.
