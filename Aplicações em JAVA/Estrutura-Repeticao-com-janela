@@ -1,0 +1,28 @@
+/* Exemplo de Estrutura de repeticao com janela pronta simples. */
+
+
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Project/Maven2/JavaApp/src/main/java/${packagePath}/${mainClassName}.java to edit this template
+ */
+
+package exerciciorepita.ExercicioRepita;
+import javax.swing.JOptionPane;
+
+/**
+ *
+ * @author Jeferson
+ */
+public class ExercicioRepita {
+
+    public static void main(String[] args) {
+        int n, s =0;
+        do{
+    n = Integer.parseInt(JOptionPane.showInputDialog(null, 
+            "<html>Informe um numero:  Valor 0 interrompe </html>" ));
+    s += n;
+}  while (n != 0);
+        JOptionPane.showMessageDialog(null, "Resultado final " +
+                "Somatorio Vale" + s);
+}
+}

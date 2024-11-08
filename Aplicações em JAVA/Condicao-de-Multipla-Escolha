@@ -1,4 +1,4 @@
-Condicao de Multipla Escolha feita em Java. Digite a quantidade de pernas e aparecerá se é um Saci, Bipede, Tripé, Quadrupede, Aranha ou um ET.
+/* Condicao de Multipla Escolha feita em Java. Digite a quantidade de pernas e aparecerá se é um Saci, Bipede, Tripé, Quadrupede, Aranha ou um ET. */
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license

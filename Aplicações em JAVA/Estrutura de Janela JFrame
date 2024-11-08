@@ -1,4 +1,4 @@
-Uma estrutura de janela em java, cujo nome chama-se JFrame.
+/* Uma estrutura de janela em java, cujo nome chama-se JFrame. */
 
 package estruturajanela;
 

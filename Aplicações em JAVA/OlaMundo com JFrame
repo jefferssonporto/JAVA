@@ -1,4 +1,4 @@
-Uma janela (Jframe) com botao e ao clicar no botao aparecerá a mensagem "Ola mundo". 
+/* Uma janela (Jframe) com botao e ao clicar no botao aparecerá a mensagem "Ola mundo". */
 
 /**
  *
