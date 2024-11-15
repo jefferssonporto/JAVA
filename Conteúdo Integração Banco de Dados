@@ -1,0 +1,101 @@
+Integração Banco de dados
+
+Tipo de Driver	
+
+JDBC - Java Database Connectivity
+Middleware do java para banco de dados
+
+1 - JDBC-ODBC Bridge - Faz a conexão por meio do ODBC.
+2 - JDBC-Native API - Utiliza o cliente do banco de dados para a conexão.
+3 - JDBC-Net - Acessa servidores de middleware via Sockets, em uma arquitetura de três camadas.
+4 - Pure Java - Com a implementação completa em Java, não precisa de cliente instalado. Também chamado de Thin Driver.
+
+funcionalidades básicas do JDBC segue quatro passos simples:
+
+Instanciar a classe do driver de conexão;
+Obter uma conexão (Connection) a partir da Connection String, usuário e senha;
+Instanciar um executor de SQL (Statement);
+Executar os comandos DML (linguagem de manipulação de dados).
+
+
+// passo 1  driver Derby sendo gerada a partir de uma chamada para o método forName
+Class.forName("org.apache.derby.jdbc.ClientDriver");  
+    // passo 2
+    Connection c1 = DriverManager.getConnection(
+    "jdbc:derby://localhost:1527/escola",
+    "escola", "escola");
+    // passo 3   chamada ao método getConnection, da classe DriverManager, sendo fornecidos os valores para Connection String, usuário e senha.
+    Statement st = c1.createStatement(); // executor de SQL
+    // passo 4 , é gerado um executor de SQL de nome st, com a chamada para o método createStatement. 
+    st.executeUpdate(   //realizamos a inserção de um registro, invocando o método executeUpdate, 
+    "INSERT INTO ALUNO VALUES('E2018.5004','DENIS',2018)");
+    st.close();
+    c1.close();
+
+
+
+ResultSet - com base na tabela criada anteriormente, efetuamos uma consulta aos dados inseridos:
+
+Class.forName("org.apache.derby.jdbc.ClientDriver");
+    Connection c1 = DriverManager.getConnection(
+    "jdbc:derby://localhost:1527/loja",
+    "loja", "loja");
+    Statement st = c1.createStatement(); // executor de SQL
+    ResultSet r1 = st.executeQuery("SELECT * FROM ALUNO"); //executar a consulta
+    while(r1.next())
+    System.out.println("Aluno: " + r1.getString("NOME")+ //pegue o campo "nome" do registro ocorrente
+    " - " + r1.getInt("ENTRADA"));
+    r1.close();
+    st.close();
+    c1.close();
+
+//getString, para texto, e getInt, para valores numéricos inteiros.
+
+SQL Parametrizado
+Proteção contra SQL Injection
+Reutilização de comandos 
+Formatação de acordo com o tipo de banco de dados
+Classe utilizada no JDBC: PreparedStatement 
+
+PreparedStatement  ps =
+    c1.PreparedStatement (
+        "insert into produto values( ?, ?, ?)" );
+    ps.setInt( 1,1002 );
+    ps.setString( 2,"Morango");
+    ps.setInt(3,530);
+    ps.executeUpdate();
+
+    ps.close(); c1.close();
+
+
+
+
+Class.forName("org.apache.derby.jdbc.ClientDriver");
+    Connection c1 = DriverManager.getConnection(
+    "jdbc:derby://localhost:1527/loja",
+    "loja", "loja");
+    PreparedStatement ps = c1.prepareStatement(
+    "DELETE FROM ALUNO WHERE ENTRADA = ?");
+    ps.setInt(1,2018);
+    ps.executeUpdate();
+    ps.close();
+    c1.close();
+
+Cada parâmetro deve ser preenchido com a chamada ao método correto, de acordo com seu tipo, como setInt, para inteiro, e setString, para texto. Após o preenchimento, devemos executar o comando SQL, com a chamada para executeUpdate, no caso das instruções INSERT, UPDATE e DELETE, ou executeQuery, para a instrução SELECT.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
