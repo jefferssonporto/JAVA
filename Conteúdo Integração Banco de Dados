@@ -298,6 +298,123 @@ EntitymanagerFactory emf =
 
 
 
+	classe com o nome SistemaEscola, incluindo a definição da instância de AlunoDAO e os métodos para exibição de valores, tanto para um aluno quanto para o conjunto completo deles.  
+
+
+	public class SistemaEscola {
+		private final AlunoDAO dao = new AlunoDAO();
+		private static final BufferedReader entrada =
+						new BufferedReader(
+						new InputStreamReader(System.in));
+			
+		private void exibir(Aluno aluno){
+			System.out.println("Aluno: "+aluno.nome+
+						"\nMatricula: "+aluno.matricula+
+						"\tEntrada: "+aluno.ano+
+						"\n==========================");
+		}
+			
+		public void exibirTodos(){
+			dao.obterTodos().forEach(aluno->exibir(aluno));
+		}
+	}
+
+	instância estática de BufferedReader:
+	
+	public void inserirAluno() throws IOException{
+		Aluno aluno = new Aluno();
+		System.out.println("Nome:");
+		aluno.nome = entrada.readLine();
+		System.out.println("Matricula:");
+		aluno.matricula = entrada.readLine();
+		System.out.println("Entrada:");
+		aluno.ano = Integer.parseInt(entrada.readLine());
+		dao.incluir(aluno);
+	}
+		
+	public void excluirAluno() throws IOException{
+		System.out.println("Matricula:");
+		String matricula = entrada.readLine();
+		dao.excluir(matricula);
+	}
+
+	Para finalizar nosso sistema cadastral, precisamos adicionar à classe um método main.
+
+	public static void main(String args[]) throws IOException{
+		SistemaEscola sistema = new SistemaEscola();
+		while(true){
+		  System.out.println(
+				 "1-Listar\t2-Inserir\t3-Excluir\t0-Sair");
+		  int opcao = Integer.parseInt(entrada.readLine());
+		  if(opcao==0)
+			 break;
+		  switch(opcao){
+			 case 1:
+			   sistema.exibirTodos();
+			   break;
+			 case 2:
+			   sistema.inserirAluno();
+			   break;
+			 case 3:
+			   sistema.excluirAluno();
+			   break;
+		  }
+		}
+	}
+
+	métodos modificados:
+	
+	@Override
+public void excluir(String chave) {
+	Connection c1 = null;
+	try {
+		c1 = getConnection();
+		c1.setAutoCommit(false);
+		PreparedStatement ps = getConnection().prepareStatement(
+						"DELETE FROM ALUNO WHERE MATRICULA = ?");
+		ps.setString(1, chave);
+		ps.executeUpdate();
+		c1.commit();
+		closeStatement(ps);
+	} catch (Exception e) {
+
+		if(c1!=null)
+			try {
+				c1.rollback();
+				c1.close();
+			} catch (SQLException e2){}
+	}
+}
+
+transações no JPA :
+ 
+public void incluir(Aluno aluno) {
+	EntityManagerFactory emf = Persistence.
+				 createEntityManagerFactory("ExemploJavaDB01PU");
+	EntityManager em = emf.createEntityManager();
+	em.getTransaction().begin();
+	try {
+	   em.persist(aluno);
+	   em.getTransaction().commit();
+	} catch (Exception e) {
+	   em.getTransaction().rollback();
+	} finally {
+	   em.close();
+	}
+}
+
+// O controle deve ser obtido com getTransaction, a partir do qual uma transação é iniciada com begin, 
+// sendo confirmada com o uso de commit, ou cancelada com rollback.
+//No fluxo de execução temos a obtenção do EntityManager, início da transação, inclusão no banco com o uso de persist 
+//e confirmação com commit. Caso ocorra um erro, temos a reversão das operações da transação como rollback, 
+//e independentemente do resultado temos a chamada para close, dentro de um bloco finally.
+
+SQL - INSERT, UPDATE, DELETE
+DAO - Incluir, Alterar, Excluir
+JpaController - create, edit, destroy
+EntityManager - persist, merge, remove
+
+
 
 
 
