@@ -305,3 +305,18 @@ Métodos relevantes:
   Sleep (long millis) - É possível suspender temporariamente a execução de uma thread utilizando o método “sleep (long millis)”. A invocação de “sleep (long millis)” faz com que a thread seja suspensa pelo período de tempo em milissegundos equivalente a “millis”. A versão sobrecarregada “sleep (long millis, int nanos)” define um período em milissegundos e nanossegundos. Porém, questões de resolução de temporização podem afetar o tempo que a thread permanecerá suspensa de fato. Isso depende, por exemplo, da granularidade dos temporizadores e da política do escalonador.
   start () e stop () - Talvez o método “start ()” seja o mais relevante depois de “run ()”. Esse método inicia a execução da thread, que passa a executar “run ()”. O método “start ()” deve ser invocado após a criação da thread e é ilegal invocá-lo novamente em uma thread em execução.
   yield () -  Esse método informa ao escalonador do sistema que a thread corrente deseja ceder seu tempo de processamento. Ao ceder tempo de processamento, busca-se otimizar o uso da CPU, melhorando a performance. 
+
+
+Método “main” :
+
+public class Principal {
+  //Atributo
+  private static Empresa ACME;
+
+  //Métodos
+  public static void main ( String args [ ] ) throws InterruptedException {
+	// Empresa (número de fitas, empregados disponíveis, número máximo de equipes, produtos a serem empacotados)
+	ACME = new Empresa ( 20 , 25 , 4 , 200 );
+  }    
+}
+
