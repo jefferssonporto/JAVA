@@ -1,0 +1,307 @@
+Thread em Java
+
+Uma thread é uma maneira de implementar múltiplos caminhos de execução em uma aplicação.
+
+Em Java, há dois tipos de threads:
+
+Daemon - As daemon threads são threads de baixa prioridade, sempre executadas em segundo plano. Essas threads provêm serviços para as threads de usuário (user threads), e sua existência depende delas, pois se todas as threads de usuário finalizarem, a MVJ forçará o encerramento da daemon thread, mesmo que suas tarefas não tenham sido concluídas. O Garbage Collector (GC) é um exemplo de daemon thread. Isso esclarece por que não temos controle sobre quando o GC será executado e nem se o método “finalize” será realizado.
+User - Threads de usuário são criadas pela aplicação e finalizadas por ela. A MVJ não força sua finalização e aguardará que as threads completem suas tarefas. Esse tipo de thread executa em primeiro plano e possui prioridades mais altas que as daemon threads. Isso não permite ao usuário ter certeza de quando sua thread entrará em execução, por isso mecanismos adicionais precisam ser usados para garantir a sincronicidade entre as threads. Veremos esses mecanismos mais à frente.
+
+6 estados de uma thread são:
+NEW - A thread está nesse estado quando é criada e ainda não está agendada para execução
+RUNNABLE - A thread entra nesse estado quando sua execução é agendada (escalonamento) ou quando entra no contexto de execução, isto é, passa a ser processada pela CPU
+BLOCKED - A thread passa para este estado quando sua execução é suspensa enquanto aguarda uma trava (lock). A thread sai desse estado quando obtém a trava
+TIMED_WAITING - A thread entra nesse estado se for suspensa por um período, por exemplo, pela chamada do método “sleep ()” (dormindo), ou quando o timeout de “wait ()” (esperando) ou “join ()” (juntando) ocorre. A thread sai desse estado quando o período de suspensão é transcorrido
+WAITING - A chamada aos métodos “wait ()” ou “join ()” sem timeout ou “park ()” (estacionado) leva a thread ao estado de “WAITING”.
+TERMINATED - O último estado ocorre quando a thread encerra sua execução
+
+Código 1: definindo thread por extensão da classe “Threads”.
+
+  
+class ThreadSubclasse extends Thread {
+	long numero;
+	ThreadSubclasse  (long numero) {
+	  this.numero = numero;
+	}
+
+	public void run() {
+// Implementa o comportamento apropriado
+	}
+} 
+
+Código 2: definindo threads por implementação de Runnable.
+
+  
+class ThreadInterface implements Runnable {
+	long numero;
+	ThreadInterface  (long numero) {
+	  this.numero = numero;
+	}
+
+	public void run() {
+// Implementa o comportamento apropriado
+	}
+} 
+
+Código 3: criando threads.
+
+  
+…
+// Extensão de Thread
+ThreadSubclasse novaT = new ThreadSubclasse (200);
+novaT.start ();
+// Implementação de Runnable
+ThreadInterface novaT = new ThreadInterface (200);
+new Thread ( novaT ).start ();
+…
+
+Semáforo / Semaphore classes :
+Acquire () - Solicita acesso a um recurso ou uma região crítica, realizando o bloqueio até que uma permissão de acesso esteja disponível ou a thread seja interrompida.
+Release () - Método responsável pela liberação do recurso pela thread.
+
+exemplo de criação de semáforo em Java.
+
+  
+public class Exemplo
+{
+  // (...)
+  Semaphore sem = new Semaphore ( 50 , true ); //Define até 50 acessos e o uso de FIFO
+  sem.acquire ( ); //Solicita 1 acesso
+  ... // Região crítica
+  sem.release ( ); //Libera o acesso obtido
+  ... //Código não crítico
+  sem.acquire ( 4 ); //Solicita 4 acessos
+  ... // Região crítica
+  sem.release ( 4 ); //Libera os 4 acessos obtidos
+  ... //Código não crítico
+}
+//Caso o semáforo seja criado com o parâmetro “fair” falso, ele não utilizará uma FIFO.
+
+Semáforo - Não verifica se a liberação de acesso veio da mesma thread que a solicitou.
+Mutex - Faz a verificação para garantir que a liberação veio da thread que a solicitou.
+
+
+Thread Mãe (classe PingPong)
+
+public class PingPong {
+	//Atributos
+	private Semaphore s1 , s2;
+	private Ping ping;
+	private Pong pong;
+	private Controle contador;
+	private int tamanho_partida;
+  
+	//Métodos
+	public PingPong ( int tamanho_partida ) throws InterruptedException {
+	  s1 = new Semaphore(0);
+	  s2 = new Semaphore(0);
+	  contador = new Controle ( tamanho_partida );
+	  ping = new Ping ( s1 , s2 , contador );
+	  pong = new Pong ( s1 , s2 , contador );
+	  //juiz = new Juiz ( tamanho_partida / 2 );
+	  new Thread ( ping ).start ();
+	  new Thread ( pong ).start ();
+	  s1.release();
+	}   
+  }
+
+
+Thread A (classe Ping)
+
+  public class Ping implements Runnable {
+	//Atributos
+	private Semaphore s1 , s2;
+	private Controle contador;
+  
+	//Métodos
+	public Ping ( Semaphore s1 ,  Semaphore s2 , Controle contador )
+	{
+	  this.s1 = s1;
+	  this.s2 = s2;
+	  this.contador = contador;
+	}
+  
+	@Override
+	public void run() {
+	  try {
+			System.out.println("Thread A (PING) iniciada");
+			   while ( contador.getControle() > 0) {
+			  s1.acquire();
+			  System.out.println( "PING => 0" );
+			  s2.release();
+			  contador.decrementa();
+			}
+		  } catch ( InterruptedException e ) {
+			 e.printStackTrace();
+		  }
+	  System.out.println("Thread A (PING) terminada");
+	}
+  }
+
+
+Thread B (classe Pong).
+  
+public class Pong implements Runnable {
+  //Atributos
+  private Semaphore s1 , s2;
+  private Controle contador;
+
+  //Métodos
+  public Pong ( Semaphore s1 ,  Semaphore s2 , Controle contador)
+  {
+	this.s1 = s1;
+	this.s2 = s2;
+	this.contador = contador;
+  }
+
+  @Override
+  public void run() {
+	try {
+		  System.out.println("Thread B (PONG) iniciada");
+		  while ( contador.getControle() > 0) {
+			s2.acquire();
+			System.out.println( "0 <= PONG" );
+			s1.release();
+			contador.decrementa();
+		  }
+		} catch ( InterruptedException e ) {
+		   e.printStackTrace();
+		}
+	System.out.println("Thread B (PONG) terminada");
+  }
+}
+
+
+Segue-se uma troca de sinalizações entre as threads até o número máximo definido pela linha 7 do código da Classe principal,
+public class Principal {
+	//Atributos
+	private static PingPong partida;
+  
+	//Métodos
+	public static void main (String args[]) throws InterruptedException {
+	  partida = new PingPong ( 8 );
+	}    
+  }
+
+
+
+Podemos observar duas execuções sucessivas de aplicação:
+  
+Thread A (PING) iniciada
+Thread B (PONG) iniciada
+PING => 0
+0 <= PONG
+PING => 0
+0 <= PONG
+PING => 0
+0 <= PONG
+PING => 0
+0 <= PONG
+Thread B (PONG) terminada
+PING => 0
+Thread A (PING) terminada
+
+Thread A (PING) iniciada
+PING => 0
+Thread B (PONG) iniciada
+0 <= PONG
+PING => 0
+0 <= PONG
+PING => 0
+0 <= PONG
+PING => 0
+0 <= PONG
+Thread B (PONG) terminada
+PING => 0
+Thread A (PING) terminada
+
+
+Conceito de monitor “synchronized”
+ ...
+private Exemplo ex = new Exemplo (); //”ex” é uma referência para objetos do tipo “Exemplo” (classe)
+...
+//Método sincronizado
+public synchronized void decrementa ( ) {
+  conta--;
+}
+...
+public void impressao () {
+//Região de código sincronizada
+  synchronized (ex) {
+   ex.imprime (); //invoca o método “imprime ()” do objeto “ex” de maneira sincronizada
+  }
+}
+...
+
+
+métodos  “wait-set” :
+
+Wait() - Adiciona a thread ao conjunto “wait-set”, liberando a trava que aquela thread possui e suspendendo sua execução. A MVJ mantém uma estrutura de dados com as threads adormecidas que aguardam acesso à região crítica do objeto.
+Notify() - Acorda a próxima thread que está aguardando na fila e garante o acesso exclusivo à thread despertada. Nesse momento a thread é removida da estrutura de espera.
+NotifyAll() - Faz basicamente o mesmo que o método notify (), mas acordando e removendo todas as threads da estrutura de espera. Entretanto, mesmo nesse caso apenas uma única thread obterá o travamento do monitor, isto é, o acesso exclusivo à região crítica.
+
+
+métodos “decrementa ()” e “getControle ()” são sincronizados.
+
+//Classe
+public class Controle {
+	//Atributo
+	private int contador = 0;
+  
+	//Métodos
+	public Controle ( int contador ) {
+	  this.contador = contador;
+	}
+  
+	public synchronized void decrementa () {
+	  this.contador--;
+	}
+  
+	public synchronized int getControle () {
+	  return this.contador;
+	}
+  }
+
+
+
+Exemplo de classe que define objetos imutáveis:
+
+//Classe
+public final class Aluno {
+	//Atributos
+	private final String nome;
+	private final long CPF;
+	private final int matricula;
+  
+	//Métodos
+	protected Aluno ( String nome , long CPF , int matricula ) {
+	  this.nome = nome;
+	  this.CPF = CPF;
+	  this.matricula = matricula;
+	}
+  
+	protected String getNome ( ) {
+	  return this.nome;
+	}    
+	protected long getCPF ( ) {
+	  return this.CPF;
+	}
+	protected int getMatricula ( ) {
+	  return this.matricula;
+	}    
+  } 
+
+
+Métodos relevantes:
+  GetPriority () e setPriority (int pri) - O método “getPriority ()” devolve a prioridade da thread, enquanto “setPriority (int pri)” é utilizado para alterar a prioridade da thread. Quando uma nova thread é criada, ela herda a prioridade da thread que a criou. Isso pode ser alterado posteriormente pelo método “setPriority (int pri)”, que recebe como parâmetro um valor inteiro correspondente à nova prioridade a ser atribuída. Observe, contudo, que esse valor deve estar entre os limites mínimo e máximo, definidos respetivamente por MIN_PRIORITY e MAX_PRIORITY.
+  GetState () - Isso pode ser alterado posteriormente pelo método “setPriority (int pri)”, que recebe como parâmetro um valor inteiro correspondente à nova prioridade a ser atribuída. Observe, contudo, que esse valor deve estar entre os limites mínimo e máximo, definidos respetivamente por MIN_PRIORITY e MAX_PRIORITY.
+  GetId () e GetName () - Os métodos “getId ()” e “getName ()” são utilizados para retornar o identificador e o nome da thread. O identificador é um número do tipo “long” gerado automaticamente no momento da criação da thread, e permanece inalterado até o fim de sua vida. Apesar de o identificador ser único, ele pode ser reutilizado após a thread finalizar.
+  SetName () - O nome da thread pode ser definido em sua criação, por meio do construtor da classe, ou posteriormente, pelo método “setName ()”. O nome da thread é do tipo “String” e não precisa ser único. Na verdade, o sistema se vale do identificador e não do nome para controlar as threads. Da mesma forma, o nome da thread pode ser alterado durante seu ciclo de vida.
+  CurrentThread () - Caso seja necessário obter uma referência para a thread corrente, ela pode ser obtida com o método “currentThread ()”, que retorna uma referência para um objeto Thread. A referência para o próprio objeto (“this”) não permite ao programador acessar a thread específica que está em execução.
+  Join () - Para situações em que o programador precise fazer com que uma thread aguarde outra finalizar para prosseguir, a class “Thread” possui o método “join ()”. Esse método ocorre em três versões, sendo sobrecarregado da seguinte forma: “join ()”, “join (long millis)” e “join (long millis, int nanos)”. Suponha que uma thread “A” precisa aguardar a thread “B” finalizar antes de prosseguir seu processamento. A invocação de “B.join ()” em “A” fará com que “A” espere (“wait”) indefinidamente até que “B” finalize. Repare que, se “B” morrer, “A” permanecerá eternamente aguardando por “B”. 
+  Uma maneira de evitar que “A” se torne uma espécie de “zumbi” é especificar um tempo limite de espera (timeout), após o qual ela continuará seu processamento, independentemente de “B” ter finalizado. A versão “join (long millis)” permite definir o tempo de espera em milissegundos, e a outra, em milissegundos e nanossegundos. Nas duas situações, se os parâmetros forem todos zero, o efeito será o mesmo de “join ()”.
+  Run () - É o método principal da classe Thread. Esse método modela o comportamento que é realizado pela thread quando ela é executada e, portanto, é o que dá sentido ao emprego da thread. Os exemplos mostrados nos códigos das Threads A e B ressaltam esse método sendo definido numa classe que implementa uma interface Runnable. Mas a situação é a mesma para o caso em que se estende a classe Thread.
+  SetDaemon () - O método “setDaemon ()” é utilizado para tornar uma thread, um daemon ou uma thread de usuário. Para isso, ele recebe um parâmetro do tipo “boolean”. A invocação de “setDaemon ( true )” marca a thread como daemon. Se o parâmetro for “false”, a thread é marcada como uma thread de usuário. Essa marcação deve ser feita, contudo, antes de a thread ser iniciada (e após ter sido criada). O tipo de thread pode ser verificado pela invocação de “isDaemon ()”, que retorna “true” se a thread for do tipo daemon.
+  Sleep (long millis) - É possível suspender temporariamente a execução de uma thread utilizando o método “sleep (long millis)”. A invocação de “sleep (long millis)” faz com que a thread seja suspensa pelo período de tempo em milissegundos equivalente a “millis”. A versão sobrecarregada “sleep (long millis, int nanos)” define um período em milissegundos e nanossegundos. Porém, questões de resolução de temporização podem afetar o tempo que a thread permanecerá suspensa de fato. Isso depende, por exemplo, da granularidade dos temporizadores e da política do escalonador.
+  start () e stop () - Talvez o método “start ()” seja o mais relevante depois de “run ()”. Esse método inicia a execução da thread, que passa a executar “run ()”. O método “start ()” deve ser invocado após a criação da thread e é ilegal invocá-lo novamente em uma thread em execução.
+  yield () -  Esse método informa ao escalonador do sistema que a thread corrente deseja ceder seu tempo de processamento. Ao ceder tempo de processamento, busca-se otimizar o uso da CPU, melhorando a performance. 
