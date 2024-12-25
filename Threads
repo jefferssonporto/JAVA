@@ -320,3 +320,314 @@ public class Principal {
   }    
 }
 
+classe “Empresa” :
+
+package com.mycompany.empacotadoraACME;
+						 
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+	
+public class Empresa {
+  //Atributos
+  private final Semaphore pool_fita; //Controla o acesso ao recurso crítico (fitas).
+  private final PoolProdutos pool_produtos; //Produtos a serem empacotados.
+  private final ArrayList< Equipe > turno; //Conjunto de equipes de empacotadores. Cada equipe possui 2 ou mais empacotadores e corresponde a uma thread.
+  private final int max_prod_empacotar; //Número máximo de produtos que serão empacotados.
+  private final int pool_empacotadores; //Número de empacotadores disponíveis para formar as equipes. Cada empacotador também corresponde a uma thread.
+  private final int nr_max_equipes; //Número máximo de equipes que podem ser formadas.
+  private int prod_empacotados; //Número de produtos empacotados.
+	
+  //Métodos
+  public Empresa ( int nr_fitas , int pool_empacotadores , int nr_max_equipes , int max_prod_empacotar ) throws InterruptedException {
+	if ( ( nr_fitas < 1 ) || ( pool_empacotadores < 2 ) || ( nr_max_equipes < 1 ) || ( max_prod_empacotar < 1 ) )
+		throw new IllegalArgumentException ( "Argumentos ilegais utilizados no construtor de Empresa." );
+	else {
+	  this.pool_fita = new Semaphore ( nr_fitas ); 
+	  this.pool_empacotadores = pool_empacotadores;
+	  this.nr_max_equipes = nr_max_equipes;
+	  this.max_prod_empacotar = max_prod_empacotar;
+	  this.pool_produtos = new PoolProdutos ( max_prod_empacotar ); 
+	  this.turno = new ArrayList< Equipe > ();
+	  this.prod_empacotados = 0;
+	  criarEquipes ( nr_fitas ); //Monta as equipes alocando os empacotadores e armazenando as equipes em "turno".
+	  turno.forEach( ( eqp ) -> eqp.start ( ) ); //Inicia todas as threads.
+	  for ( Equipe eqp : turno ) //Faz o join com todas as threads de equipe.
+		try {
+			eqp.join ( ); //A thread principal deve aguardar o fim de todas as threads Equipe para poder contabilizar os empacotamentos.
+		} catch ( InterruptedException e ) {
+		   e.printStackTrace();
+		}
+	  for ( Equipe eqp : turno )
+		prod_empacotados = prod_empacotados + eqp.getEmpacotamentos(); //Contabiliza o total de empacotamentos.
+	  System.out.println ("TOTAL DE EMPACOTAMENTOS: " + prod_empacotados );
+	}
+  }
+  private void criarEquipes ( int nr_fitas ) {
+	Equipe eqp;
+	int nr_emp_eqp;
+	int empacotadores_disponiveis = pool_empacotadores;
+	int i = 1;
+	do { //Cria as equipes com um número aleatório de integrantes e as adiciona em "turno".
+		nr_emp_eqp = comporEquipe ( empacotadores_disponiveis );
+		if ( nr_emp_eqp > nr_fitas )
+			nr_emp_eqp = nr_fitas; //Do contrário, teríamos mais solicitações de acesso do que o semáforo possui e a thread bloquearia eternamente.
+		eqp = new Equipe ( "Eqp[" + String.valueOf ( i ) + "]", nr_emp_eqp , pool_fita , pool_produtos );
+		turno.add ( eqp );
+		empacotadores_disponiveis = empacotadores_disponiveis - nr_emp_eqp;
+		i++;
+	} while ( ( i < nr_max_equipes ) && ( empacotadores_disponiveis >= 2 ) );
+	/**A última equipe recebe todos os empregados restantes. Se o número de empregados for maior do que o número de fitas,
+	* são alocados nr_fitas empregados (caso contrário, a equipe iria solicitar um número de permissões superior ao número
+	* de recursos do semáforo e ficaria bloqueada).
+	*/
+	if ( empacotadores_disponiveis > 0 ) {
+		if ( nr_fitas > empacotadores_disponiveis )
+			eqp = new Equipe ( "Eqp[" + String.valueOf ( i ) + "]" , empacotadores_disponiveis , pool_fita , pool_produtos );
+		else
+			eqp = new Equipe ( "Eqp[" + String.valueOf ( i ) + "]", nr_fitas , pool_fita , pool_produtos );
+		turno.add ( eqp );
+	} 
+  }
+  private final int comporEquipe ( int empacotadores_disponiveis ) {
+	Random rnd = new Random ( );
+	if ( empacotadores_disponiveis > 2 )
+		return rnd.nextInt ( pool_empacotadores / nr_max_equipes ) + 2;
+	else
+		return empacotadores_disponiveis;
+  }
+} 
+
+
+como a classe “Equipe” funciona:
+
+
+package com.mycompany.empacotadoraACME;
+	
+//Importações
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+
+public class Equipe extends Thread {
+  //Atributos
+  private final int nr_integrantes;
+  private CountDownLatch latch;
+  private final Semaphore pool_fita;
+  private final PoolProdutos pool_produtos;
+  private final ArrayList< Empacotador > empacotadores;
+  private final ContadorSinc prod_empacotados_eqp;
+
+  //Métodos
+  public Equipe ( String nome , int nr_integrantes , Semaphore pool_fita , PoolProdutos pool_produtos )
+  {
+	this.setName(nome);
+	this.nr_integrantes = nr_integrantes;
+	this.pool_fita = pool_fita;
+	this.pool_produtos = pool_produtos;
+	this.empacotadores = new ArrayList< Empacotador > ();
+	prod_empacotados_eqp = new ContadorSinc ( 0 );
+	prepararEmpacotadores ( );
+  }
+  /**
+   * Realiza atomicamente as operações de decremento do latch, incremento do número de pacotes
+   * que a equipe empacotou e libera (uma) trava sobre o semáforo "pool_fita".
+   */
+  public synchronized void liberarFita ( ) {
+	latch.countDown();
+	prod_empacotados_eqp.incrementar();
+	pool_fita.release();
+  }
+  /**
+   * Realiza atomicamente as operações de decremento do latch e libera "nr_travas" travas sobre o semáforo "pool_fita".
+   */
+  public synchronized void liberarFitasDesnecessarias ( int nr_travas_liberadas ) {
+	pool_fita.release( nr_travas_liberadas );
+	while ( nr_travas_liberadas > 0 ) {
+		latch.countDown();
+		nr_travas_liberadas--;
+	}
+  }
+  public synchronized int getEmpacotamentos ( ) {
+	return prod_empacotados_eqp.getContador();
+  }
+  public synchronized int getNrIntegrantes ( ) {
+	return nr_integrantes;
+  }
+  private void prepararEmpacotadores ( ) {
+	for ( int i = 1 ; i <= nr_integrantes ; i++ ) {
+		Empacotador emp = new Empacotador ( i , this );
+		empacotadores.add(emp);
+	}
+  }
+  /**
+   * Para cada empregador, se houver pacote disponível para empacotar, decrementa pool_pacotes, dispara uma
+   * thread (Empacotador) para realizar o trabalho de empacotamento. Do contrário, não faz nada.
+   * @return Se for possível retirar um pacote para cada (Empacotador), retorna true, caso contrário, retorna false. 
+   */
+  private boolean empacotar ( int nr_produtos ) {
+	Thread thd;
+	int thd_criadas = pool_produtos.retirarProdutos ( nr_produtos ); //O número de threads a ser criado para empacotar é igual ao número de produtos retirados pela equipe.
+	boolean controle;
+	if ( thd_criadas == 0 ) { //Não há produtos disponíveis para empacotamento.
+		liberarFitasDesnecessarias ( nr_produtos ); //Devolve todas as fitas pegas.
+		return false;
+	} else {
+		for ( int i = 1 ; i <= thd_criadas ; i++ ) {
+			thd = new Thread ( empacotadores.get ( i - 1 ) );
+			thd.setPriority ( Thread.currentThread().getPriority() + 2 );
+			thd.start ( ); //Inicia a thread (Empacotador).        
+		}
+		liberarFitasDesnecessarias ( nr_produtos - thd_criadas ); //Devolve todas as fitas excedentes.
+		return bloquear ( ); //Bloqueia a thread (Equipe) até que os empacotadores terminem o trabalho.
+	}
+  }    
+  /**
+   * Realiza o bloqueio da thread até que todas as threads (Empacotador) tenham finalizado
+   * @return boolean
+   */
+  private boolean bloquear ( ) {
+  try {        
+	  latch.await(); //Bloqueia a thread (Equipe) até que os empacotadores terminem o trabalho.
+	  return true;
+  } catch ( InterruptedException e ) {
+	 e.printStackTrace();
+	 return false;
+	}  
+  }
+  private synchronized void relatar ( ) {
+	System.out.println ( "\n/----------------------------------------\\" );
+	System.out.println ( getName () + " (thread: " + Thread.currentThread().getId () +  ") FINALIZOU" );
+	System.out.println ( " |- Nr Integrantes: " + this.nr_integrantes );
+	System.out.println ( " |- Empacotamentos da equipe: " + this.prod_empacotados_eqp.getContador() );
+	System.out.println ( " |- Empacotamentos por integrante:" );
+	empacotadores.forEach( (emp ) -> emp.listarEmpacotamentos ( ) );
+	System.out.println ( " |- Threads por objeto Empacotador:" );
+	empacotadores.forEach( (emp ) -> emp.listarIdThreads ( ) );
+	System.out.println ( "\\----------------------------------------/\n" );
+  }
+  @Override
+  public void run() {
+   try {
+		 boolean controle;
+		 System.out.println ( getName () +  " PRONTA" );
+		 do {
+		   pool_fita.acquire ( nr_integrantes );
+		   this.latch = new CountDownLatch ( nr_integrantes );
+		   controle = empacotar ( nr_integrantes ); //Cada integrante da equipe empacota um produto.
+		} while ( controle );
+	} catch ( InterruptedException e ) {
+	   e.printStackTrace();
+	}
+  relatar ( );
+  }
+} 
+
+
+ A classe “Empacotador”:
+
+ package com.mycompany.empacotadoraACME;
+						 
+//Importações
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+	
+public class Empacotador implements Runnable {
+  //Atributos
+  private final Equipe equipe;
+  private final ContadorSinc empacotamentos;
+  private final String nome;
+  private String lista_threads_id;
+
+  //Métodos
+  public Empacotador ( int nr_empacotador , Equipe equipe )
+  {
+	this.equipe = equipe;
+	this.lista_threads_id = new String ();
+	this.nome = "Emp[" + nr_empacotador + "]@" + equipe.getName();
+	Thread.currentThread ( ).setName ( nome );       
+	empacotamentos = new ContadorSinc ( 0 );
+  }
+  public void listarIdThreads ( ) {
+	System.out.println ( " |----- Lista de threads executadas por " + nome + " : " + lista_threads_id );
+  }
+  public void listarEmpacotamentos ( ) {
+	System.out.println ( " |----- Empacotamentos feitos por " + nome + " : " + empacotamentos.getContador() );
+  }
+  @Override
+  public void run() {
+    try {
+		 synchronized ( lista_threads_id ) {
+		   lista_threads_id = lista_threads_id + "[" + Thread.currentThread().getId() + "]"; //Constrói na instância de Empacotador uma lista com todas as threads que foram criadas.
+		 }
+		 System.out.println ( nome + " empacotando (" + System.currentTimeMillis() + ")" );
+		 Thread.sleep ( ( int ) ( Math.random ( ) * 899 + 100 ) ); //Coloca a thread para dormir por um período aleatório entre 100 e 999 milissegundos.
+		 System.out.println ( nome + " concluiu  (" + System.currentTimeMillis() + ")" );
+		 empacotamentos.incrementar(); //Incrementa o contador de empacotamentos da instância de Empacotador.
+		 equipe.liberarFita();
+	   } catch ( InterruptedException e ) {
+		  e.printStackTrace();
+	   }
+  }
+} 
+
+
+Classe “ContadorSinc”, método “decrementar”:
+
+package com.mycompany.empacotadoraACME;
+	
+public class ContadorSinc {
+  //Atributo
+  private int contador;
+  private final int inicio;
+
+  //Métodos
+  public ContadorSinc ( int inicio ) {
+	this.inicio = inicio;
+	this.contador = inicio;
+  }
+  public synchronized void decrementar ( ) {
+	this.contador--;
+  }
+  public synchronized void decrementar ( int n ) {
+	this.contador = this.contador - n;
+  }
+  public synchronized void incrementar ( ) {
+	this.contador++;
+  }
+  public synchronized void incrementar ( int n ) {
+	this.contador = this.contador + n;
+  }
+  public synchronized void resetContador ( ) {
+	this.contador = this.inicio;
+  }
+  public synchronized void zerarContador ( ) {
+	this.contador = 0;
+  }
+  public synchronized int getContador ( ) {
+	return this.contador;
+  }
+
+Classe  “PoolProdutos”:
+
+package com.mycompany.empacotadoraACME;
+						 
+public final class PoolProdutos extends ContadorSinc {
+	
+  //Métodos
+  public PoolProdutos ( int qtdade_produtos ) {
+	super ( qtdade_produtos );
+	if ( qtdade_produtos < 1 )
+		throw new IllegalArgumentException ( "Argumentos ilegais utilizados no construtor de PoolProdutos." );        
+  }
+  public synchronized int retirarProdutos ( int nr_produtos ) {
+	int aux = getContador ();
+	if ( ( aux - nr_produtos ) >= 0 ) { //Há produtos disponíveis suficientes para atender à retirada.
+		decrementar ( nr_produtos );
+		return nr_produtos;
+	} else { //Os produtos são insuficientes ou inexistentes.
+		zerarContador ();
+		return aux;  
+	}
+  }
+} 
