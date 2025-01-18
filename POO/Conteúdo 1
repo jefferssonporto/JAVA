@@ -12,3 +12,29 @@ Manutenível - Atualizar um software é mais fácil. Uma pequena modificação v
 Extensível - O software não é um estático. Ele deve crescer para permanecer útil.
 Reutilizável - Podemos usar objetos de um sistema que criamos em outro sistema futuro.
 Natural - Mais fácil de entender. Você se preocupa mais na funcionalidade do que nos detalhes de implementação.
+
+UML - Linguagem de Modelagem Unificada - Modificadores de Visibilidade - Indicam o nível de acesso aos componentes internos de uma classe
++ - Pública - classe atual e todas as outras classes
+- Privado - somente a classe atual
+# protegido - a classe atual e todas as suas subclasses
+
+Getters - Métodos acessores - que dão acessos. 
+ex: e = nova estante
+    t = e.getTotDoc()
+
+Setters - Métodos Modificadores - modificam coisas dentro do objeto. Normalmente precisa de um parametro. 
+ex: e = nova estante 
+    e.setTotDoc(doc)
+
+Método Construct - Método Construtor - Faz a chamada do método automaticamente, sempre que for criado algum o metodo, automaticamente faz a chamada do constrtuct. 
+Ex: Classe Caneta 
+    método construtor 
+    (: caractere, c: Caractere, p: Real)
+    setModelo(m) 
+    setcor(c)
+    setPonta(p)
+    tampar()
+    FimMetodo
+    FimClasse
+    c1 = nova Caneta
+    ("BIC", "Azul", 0.5)
