@@ -26,7 +26,7 @@ Setters - Métodos Modificadores - modificam coisas dentro do objeto. Normalment
 ex: e = nova estante 
     e.setTotDoc(doc)
 
-Método Construct - Método Construtor - Faz a chamada do método automaticamente, sempre que for criado algum o metodo, automaticamente faz a chamada do constrtuct. 
+Método Construct - Método Construtor - Faz a chamada do método automaticamente, sempre que for criado algum o metodo, automaticamente faz a chamada do constrtuct. Método que tem o mesmo nome da classe
 Ex: Classe Caneta 
     método construtor 
     (: caractere, c: Caractere, p: Real)
