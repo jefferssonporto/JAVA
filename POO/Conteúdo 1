@@ -38,3 +38,7 @@ Ex: Classe Caneta
     FimClasse
     c1 = nova Caneta
     ("BIC", "Azul", 0.5)
+
+3 Pilares EHP
+    Encapsulamento, Herança, Poliformismo
+    Encapsulamento - Tem o mesmo padrão, protege o código do usuário e o usuário do código.
