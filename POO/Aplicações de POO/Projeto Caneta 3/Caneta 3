@@ -53,25 +53,3 @@ public class Caneta {
    }
 }
 
-/* Chamado do método */ 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Project/Maven2/JavaApp/src/main/java/${packagePath}/${mainClassName}.java to edit this template
- */
-
-package aula04.aula04;
-
-/**
- *
- * @author Jeferson
- */
-public class Aula04 {
-
-    public static void main(String[] args) {
-        Caneta c1 = new Caneta("NIC", "Amarelo", 0.4f);
-       c1.status();
-       Caneta c2 = new Caneta ("VIC", "Laranja", 1.5f);
-       c2.status();
-    }
-    /*Na sequencia pode ir adicionando quantas canetas quiser, sempre vai chamar automaticamente o método automaticamente*/
-}
