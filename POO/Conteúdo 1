@@ -43,4 +43,8 @@ Ex: Classe Caneta
 3 Pilares EHP
     Encapsulamento, Herança, Poliformismo
     Encapsulamento - Tem o mesmo padrão, protege o código do usuário e o usuário do código.
+    Herança - Permite basear uma nova classe na definição de uma outra classe previamente existente. (Faz uma nova classe baseada na primeira). A herança será aplicada para características e comportamentos.
 
+
+MÃE/PROGENITORA/SUPERCLASSE - uma classe que dá origem a outras classes que vão herdar todas as suas características e comportamentos.
+Classes filhas / Subclasses - Classes oriundas das suas superclasses.
