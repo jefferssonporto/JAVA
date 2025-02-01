@@ -17,6 +17,7 @@ UML - Linguagem de Modelagem Unificada - Modificadores de Visibilidade - Indicam
 + - Pública - classe atual e todas as outras classes
 - Privado - somente a classe atual
 # protegido - a classe atual e todas as suas subclasses
+\n - quebra linha 
 
 Getters - Métodos acessores - que dão acessos. 
 ex: e = nova estante
@@ -42,3 +43,4 @@ Ex: Classe Caneta
 3 Pilares EHP
     Encapsulamento, Herança, Poliformismo
     Encapsulamento - Tem o mesmo padrão, protege o código do usuário e o usuário do código.
+
