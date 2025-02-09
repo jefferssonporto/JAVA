@@ -66,3 +66,7 @@ Método Abstrato - Declarado, mas não implementado na progenitora. Só pode ser
 Classe Final - Não pode ser herdada por outra classe. Ela é Obrigatoriamente folha, não pode ter filhos.
 
 Método Final - É aquele que não pode ser sobrescrito pelas suas sub-classes. Ele é Obrigatoriamente herdado.
+
+Poliformismo: Permite que um mesmo nome representa vários comportamentos diferentes.
+ Poli - muitas 
+ Morfo - Formas
