@@ -13,6 +13,10 @@ Extensível - O software não é um estático. Ele deve crescer para permanecer 
 Reutilizável - Podemos usar objetos de um sistema que criamos em outro sistema futuro.
 Natural - Mais fácil de entender. Você se preocupa mais na funcionalidade do que nos detalhes de implementação.
 
+int - inteiro
+lógico - booelan 
+real - float
+
 UML - Linguagem de Modelagem Unificada - Modificadores de Visibilidade - Indicam o nível de acesso aos componentes internos de uma classe
 + - Pública - classe atual e todas as outras classes
 - Privado - somente a classe atual
@@ -48,3 +52,16 @@ Ex: Classe Caneta
 
 MÃE/PROGENITORA/SUPERCLASSE - uma classe que dá origem a outras classes que vão herdar todas as suas características e comportamentos.
 Classes filhas / Subclasses - Classes oriundas das suas superclasses.
+
+Extends = Herança
+Antes do extends é a filha, depois do extends é a mãe.
+
+Conceitos :
+
+Classe Abstrata - Definiu uma classe como abstrata, ela não pode gerar objetos. Não pode ser instaciada. Só pode servir como progenitora.
+
+Método Abstrato - Declarado, mas não implementado na progenitora. Só pode ser colocado dentro de uma interface ou um método abstrato.
+ 
+Classe Final - Não pode ser herdada por outra classe. Ela é Obrigatoriamente folha, não pode ter filhos.
+
+Método Final - É aquele que não pode ser sobrescrito pelas suas sub-classes. Ele é Obrigatoriamente herdado.
