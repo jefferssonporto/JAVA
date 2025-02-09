@@ -16,6 +16,7 @@ Natural - Mais fácil de entender. Você se preocupa mais na funcionalidade do q
 int - inteiro
 lógico - booelan 
 real - float
+Overrider - Sobre posto
 
 UML - Linguagem de Modelagem Unificada - Modificadores de Visibilidade - Indicam o nível de acesso aos componentes internos de uma classe
 + - Pública - classe atual e todas as outras classes
