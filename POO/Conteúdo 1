@@ -70,3 +70,7 @@ Método Final - É aquele que não pode ser sobrescrito pelas suas sub-classes. 
 Poliformismo: Permite que um mesmo nome representa vários comportamentos diferentes.
  Poli - muitas 
  Morfo - Formas
+
+ Poliformismo de sobreposição: Mesma assinatura de classes diferentes.
+ 
+ Poliformismo de Sobrecarga: Assinatura diferentes mesma classes.
